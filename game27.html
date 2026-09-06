@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק הפעלים שלי - עולים לכיתה ב'!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Varela Round', sans-serif;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Custom Animations */
+        @keyframes pop {
+            0% { transform: scale(0.9); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-pop {
+            animation: pop 0.4s ease-out forwards;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+        }
+
+        .animate-shake {
+            animation: shake 0.4s;
+        }
+
+        @keyframes bounce-sm {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .hover-bounce:hover {
+            animation: bounce-sm 0.5s infinite;
+        }
+
+        /* Hidden class for transitioning between screens */
+        .hidden-screen {
+            display: none !important;
+        }
+
+        .verb-card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 0.75rem;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        
+        .verb-card:hover {
+            border-color: #fb7185;
+            transform: translateY(-2px);
+        }
+
+        .option-btn {
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .option-btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Confetti canvas */
+        #confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div id="welcome-screen" class="max-w-3xl mx-auto w-full p-4 md:p-8 flex flex-col items-center justify-center min-h-screen animate-pop">
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 md:p-10 shadow-xl w-full border-4 border-pink-300">
+            <h1 class="text-3xl md:text-5xl font-bold text-center text-pink-500 mb-4">
+                שלום לכיתה ב'! 🎒
+            </h1>
+            <p class="text-lg md:text-xl text-center mb-6 text-gray-700">
+                את כבר אלופה ויודעת <span class="font-bold text-purple-600">לקרוא, לעשות, ללכת ולדבר</span>! 🎉<br>
+                עכשיו נלמד 10 מילים חדשות שיעזרו לך בבית הספר ועם חברים.
+            </p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-8">
+                <div class="verb-card">
+                    <div class="text-3xl mb-1">🤔</div>
+                    <div class="font-bold text-blue-600">לַחְשׁוֹב</div>
+                    <div class="text-sm text-gray-500 mt-1 font-sans" dir="ltr">думать</div>
+                </div>
+                <div class="verb-card">
+                    <div class="text-3xl mb-1">👆</div>
+                    <div class="font-bold text-pink-600">לִבְחוֹר</div>
+                    <div class="text-sm text-gray-500 mt-1 font-sans" dir="ltr">выбирать</div>
+                </div>
+                <div class="verb-card">
+                    <div class="text-3xl mb-1">💡</div>
+                    <div class="font-bold text-green-600">לְהַחְלִיט</div>
+                    <div class="text-sm text-gray-500 mt-1 font-sans" dir="ltr">решать</div>
+                </div>
+                <div class="verb-card">
+                    <div class="text-3xl mb-1">🧩</div>
+                    <div class="font-bold text-orange-600">לְשַׂחֵק</div>
+                    <div class="text-sm text-gray-500 mt-1 font-sans" dir="ltr">играть</div>
+                </div>
+                <div class="verb-card">
+                    <div class="text-3xl mb-1">🤝</div>
+                    <div class="font-bold text-teal-600">לַעֲזוֹר</div>
+                    <div class="text-sm text-gray-500 mt-1 font-sans" dir="ltr">помогать</div>
+                </div>
+                <div class="verb-card">
+                    <div class="text-3xl mb-1">👂</div>
+                    <div class="font-bold text-indigo-600">לְהַקְשִׁיב</div>
+                    <div class="text-sm text-gray-500 mt-1 font-sans" dir="ltr">слушать</div>
+                </div>
+                <div class="verb-card">
+                    <div class="text-3xl mb-1">✍️</div>
+                    <div class="font-bold text-red-500">לִכְתּוֹב</div>
+                    <div class="text-sm text-gray-500 mt-1 font-sans" dir="ltr">писать</div>
+                </div>
+                <div class="verb-card">
+                    <div class="text-3xl mb-1">❓</div>
+                    <div class="font-bold text-purple-600">לִשְׁאוֹל</div>
+                    <div class="text-sm text-gray-500 mt-1 font-sans" dir="ltr">спрашивать</div>
+                </div>
+                <div class="verb-card">
+                    <div class="text-3xl mb-1">🎁</div>
+                    <div class="font-bold text-yellow-500">לְשַׁתֵּף</div>
+                    <div class="text-sm text-gray-500 mt-1 font-sans" dir="ltr">делиться</div>
+                </div>
+                <div class="verb-card">
+                    <div class="text-3xl mb-1">🙋‍♀️</div>
+                    <div class="font-bold text-blue-500">לַעֲנוֹת</div>
+                    <div class="text-sm text-gray-500 mt-1 font-sans" dir="ltr">отвечать</div>
+                </div>
+            </div>
+
+            <div class="flex justify-center">
+                <button onclick="startGame()" class="bg-gradient-to-r from-pink-400 to-purple-500 text-white text-xl md:text-2xl font-bold py-4 px-10 rounded-full shadow-lg transform hover:scale-105 transition-transform hover-bounce">
+                    אני מוכנה לשחק! 🚀
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-screen" class="max-w-2xl mx-auto w-full p-4 md:p-8 flex-col justify-center min-h-screen hidden-screen">
+        
+        <!-- Progress Bar -->
+        <div class="bg-white rounded-full h-6 w-full mb-6 shadow-inner border-2 border-pink-200 overflow-hidden relative">
+            <div id="progress-bar" class="bg-gradient-to-r from-green-400 to-green-300 h-full rounded-full transition-all duration-500 flex items-center justify-center text-xs font-bold text-green-900" style="width: 0%;">
+            </div>
+            <div class="absolute inset-0 flex items-center justify-center text-sm font-bold text-gray-700 mix-blend-difference z-10" id="progress-text">
+                0 / 30
+            </div>
+        </div>
+
+        <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 md:p-10 shadow-xl w-full border-4 border-purple-300 text-center relative">
+            
+            <!-- Feedback Overlay -->
+            <div id="feedback" class="absolute inset-0 flex items-center justify-center rounded-3xl bg-white/95 z-20 hidden-screen flex-col">
+                <div id="feedback-emoji" class="text-7xl mb-4">✨</div>
+                <div id="feedback-text" class="text-3xl font-bold text-green-500">כל הכבוד!</div>
+            </div>
+
+            <!-- Question Area -->
+            <div id="question-container" class="animate-pop">
+                <div class="text-5xl mb-4" id="question-icon">🏫</div>
+                <h2 id="question-text" class="text-2xl md:text-3xl font-bold text-gray-800 mb-8 leading-tight">
+                    טוען שאלה...
+                </h2>
+                
+                <div id="options-container" class="flex flex-col gap-4">
+                    <!-- Options injected by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="end-screen" class="max-w-3xl mx-auto w-full p-4 md:p-8 flex-col items-center justify-center min-h-screen hidden-screen text-center">
+        <div class="bg-white/95 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-2xl w-full border-4 border-yellow-400">
+            <div class="text-7xl mb-4">🏆</div>
+            <h1 class="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-600 mb-6">
+                אלופה אמיתית!
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-700 mb-8">
+                סיימת את כל 30 התרגילים!<br>
+                את מוכנה לחלוטין לכיתה ב', גם בשיעורים וגם בהפסקות עם חברים!
+            </p>
+            
+            <button onclick="location.reload()" class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xl font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-transform hover-bounce">
+                לשחק שוב 🔄
+            </button>
+        </div>
+    </div>
+
+    <canvas id="confetti"></canvas>
+
+    <script>
+        // Database of exactly 30 questions focusing on the 10 new verbs.
+        // New verbs: לבחור, להחליט, לשחק, לעזור, להקשיב, לכתוב, לשאול, לשתף, לחשוב, לענות
+        // Known distractors: לקרוא, לעשות, ללכת, לדבר
+        const questionsData = [
+            { t: "בהפסקה אני הולכת ___ משחקי קופסה עם יעל. 🎲", a: "לשחק", d: ["לכתוב", "ללכת"] },
+            { t: "חבר נפל בחצר, אני רצה ___ לו לקום. 🤝", a: "לעזור", d: ["לשחק", "להקשיב"] },
+            { t: "בשיעור חשוב מאוד ___ למורה כדי ללמוד. 👂", a: "להקשיב", d: ["לשחק", "לבחור"] },
+            { t: "אני מוציאה עיפרון חדש כדי ___ במחברת. ✍️", a: "לכתוב", d: ["לעזור", "לשתף"] },
+            { t: "אם אני לא מבינה משהו, כדאי ___ את המורה. 🙋‍♀️", a: "לשאול", d: ["לענות", "להחליט"] },
+            { t: "כשהמורה שואלת שאלה, אני מרימה אצבע כדי ___. ☝️", a: "לענות", d: ["לשחק", "לחשוב"] },
+            { t: "לפני שפותרים תרגיל קשה בחשבון, צריך רגע ___. 🤔", a: "לחשוב", d: ["לכתוב", "ללכת"] },
+            { t: "הבאתי חטיף טעים, ואני רוצה ___ בו את החברה שלי. 🥨", a: "לשתף", d: ["להקשיב", "לבחור"] },
+            { t: "בספרייה אני צריכה ___ ספר מעניין לקרוא. 📚", a: "לבחור", d: ["לשתף", "לעזור"] },
+            { t: "יש לי שני משחקים, ואני צריכה ___ באיזה מהם נשחק. 💡", a: "להחליט", d: ["לכתוב", "לשאול"] },
+            
+            { t: "אחר הצהריים הזמנתי חברה ___ אצלי בחדר. 🧸", a: "לשחק", d: ["לענות", "לקרוא"] },
+            { t: "אבא מכין ארוחת ערב, אני באה ___ לו לחתוך סלט. 🥗", a: "לעזור", d: ["לבחור", "לחשוב"] },
+            { t: "החברה שלי מספרת לי סוד, ואני מבטיחה ___. 🤫", a: "להקשיב", d: ["לכתוב", "לעשות"] },
+            { t: "אני רוצה ___ ברכה יפה ליום ההולדת של חברה שלי. 💌", a: "לכתוב", d: ["להחליט", "לדבר"] },
+            { t: "איבדתי את המחק שלי, אני צריכה ___ אם למישהו יש להלוות לי. ✏️", a: "לשאול", d: ["לחשוב", "לבחור"] },
+            { t: "חברה שאלה אותי אם אני באה אליה, אני צריכה ___ לה שכן! 😊", a: "לענות", d: ["לשתף", "לעזור"] },
+            { t: "המורה נתנה חידה ממש קשה! תנו לי דקה ___. 🧠", a: "לחשוב", d: ["להחליט", "לשאול"] },
+            { t: "כשעושים עבודה בקבוצה, חשוב ___ פעולה עם כולם. 👨‍👩‍👧‍👦", a: "לשתף", d: ["לכתוב", "להקשיב"] },
+            { t: "בחנות הממתקים צריך ___ ממתק אחד בלבד! 🍭", a: "לבחור", d: ["לעזור", "לענות"] },
+            { t: "מה נלבש מחר לבית הספר? כל כך קשה ___! 👗", a: "להחליט", d: ["לשחק", "לשתף"] },
+            
+            { t: "בשיעור ספורט אנחנו אוהבים ___ בכדורשת. 🏐", a: "לשחק", d: ["להקשיב", "ללכת"] },
+            { t: "דני לא מוצא את הקלמר שלו, אני רוצה ___ לו לחפש. 🎒", a: "לעזור", d: ["להחליט", "לבחור"] },
+            { t: "כשיש שעת סיפור בספרייה, כולם צריכים בשקט ___. 📖", a: "להקשיב", d: ["לשתף", "לשחק"] },
+            { t: "למדנו אות חדשה, ועכשיו אנחנו צריכים ___ אותה יפה. 📝", a: "לכתוב", d: ["לשאול", "להחליט"] },
+            { t: "״אפשר להצטרף למשחק?״ זה משפט שצריך בנימוס ___. 🗣️", a: "לשאול", d: ["לכתוב", "לחשוב"] },
+            { t: "במבחן חשוב לקרוא טוב ו___ על כל השאלות. ✔️", a: "לענות", d: ["לשאול", "לעשות"] },
+            { t: "לפני השינה, איזה כיף ___ על דברים טובים שקרו היום. 🌙", a: "לחשוב", d: ["לשתף", "להקשיב"] },
+            { t: "ציירתי ציור יפה ואני רוצה ___ אותו עם הכיתה. 🎨", a: "לשתף", d: ["להחליט", "לענות"] },
+            { t: "מחברת שורות או משבצות? אני לא מצליחה ___! 📓", a: "לבחור", d: ["לעזור", "לחשוב"] },
+            { t: "זה הזמן ___ שמתחילים את השיעור! ⏰", a: "להחליט", d: ["לשאול", "לכתוב"] }
+        ];
+
+        let currentQuestionIndex = 0;
+        let shuffledQuestions = [];
+
+        // DOM Elements
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const feedback = document.getElementById('feedback');
+        const feedbackText = document.getElementById('feedback-text');
+        const feedbackEmoji = document.getElementById('feedback-emoji');
+
+        function shuffleArray(array) {
+            const newArr = [...array];
+            for (let i = newArr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+            }
+            return newArr;
+        }
+
+        function startGame() {
+            // Hide welcome, show game
+            welcomeScreen.classList.add('hidden-screen');
+            gameScreen.classList.remove('hidden-screen');
+            gameScreen.style.display = 'flex';
+            
+            // Shuffle questions to make it slightly different every time (optional, but good for replay)
+            // Even though we need exactly 30, shuffling the order keeps it fresh.
+            shuffledQuestions = shuffleArray(questionsData);
+            currentQuestionIndex = 0;
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = shuffledQuestions[currentQuestionIndex];
+            
+            // Extract emoji from text if present at the end
+            let textWithoutEmoji = q.t;
+            let emoji = "🏫";
+            const lastChar = q.t.slice(-2); // Handle 2-byte emojis loosely
+            if (/\p{Extended_Pictographic}/u.test(q.t)) {
+               const match = q.t.match(/(\p{Extended_Pictographic}+)$/u);
+               if(match) {
+                   emoji = match[1];
+                   textWithoutEmoji = q.t.replace(emoji, '').trim();
+               }
+            }
+            
+            document.getElementById('question-icon').innerText = emoji;
+            questionText.innerText = textWithoutEmoji;
+
+            // Prepare options: 1 correct + 2 distractors
+            const options = shuffleArray([q.a, ...q.d]);
+            
+            optionsContainer.innerHTML = '';
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn w-full py-4 px-6 bg-white border-2 border-purple-200 text-purple-700 text-xl md:text-2xl font-bold rounded-2xl hover:bg-purple-50 hover:border-purple-400 focus:outline-none shadow-sm flex items-center justify-center';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(opt, q.a, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            updateProgress();
+        }
+
+        function checkAnswer(selected, correct, btnElement) {
+            if (selected === correct) {
+                // Correct!
+                btnElement.classList.remove('border-purple-200', 'text-purple-700', 'bg-white');
+                btnElement.classList.add('bg-green-100', 'border-green-500', 'text-green-700');
+                showFeedback(true);
+            } else {
+                // Incorrect
+                btnElement.classList.remove('border-purple-200', 'text-purple-700', 'bg-white');
+                btnElement.classList.add('bg-red-50', 'border-red-400', 'text-red-600', 'animate-shake');
+                setTimeout(() => {
+                    btnElement.classList.remove('animate-shake');
+                }, 400);
+                showFeedback(false);
+            }
+        }
+
+        function showFeedback(isCorrect) {
+            feedback.classList.remove('hidden-screen');
+            
+            if (isCorrect) {
+                const praises = ["אלופה!", "מצוין!", "כל הכבוד!", "נפלא!", "בול!", "חכמה מאוד!"];
+                const randomPraise = praises[Math.floor(Math.random() * praises.length)];
+                
+                feedbackText.innerText = randomPraise;
+                feedbackText.className = "text-4xl md:text-5xl font-bold text-green-500 text-center";
+                feedbackEmoji.innerText = ["🌟", "🎉", "👑", "🚀", "👏"][Math.floor(Math.random() * 5)];
+                feedback.style.backgroundColor = "rgba(255, 255, 255, 0.95)";
+                
+                setTimeout(() => {
+                    feedback.classList.add('hidden-screen');
+                    currentQuestionIndex++;
+                    if (currentQuestionIndex < shuffledQuestions.length) {
+                        loadQuestion();
+                    } else {
+                        finishGame();
+                    }
+                }, 1200);
+
+            } else {
+                feedbackText.innerText = "כמעט... נסי שוב! 😊";
+                feedbackText.className = "text-2xl md:text-3xl font-bold text-orange-500 text-center";
+                feedbackEmoji.innerText = "💪";
+                feedback.style.backgroundColor = "rgba(255, 255, 255, 0.9)";
+                
+                setTimeout(() => {
+                    feedback.classList.add('hidden-screen');
+                }, 1200);
+            }
+        }
+
+        function updateProgress() {
+            const total = shuffledQuestions.length;
+            const current = currentQuestionIndex;
+            const percentage = (current / total) * 100;
+            
+            progressBar.style.width = percentage + '%';
+            progressText.innerText = `${current} / ${total}`;
+        }
+
+        function finishGame() {
+            updateProgress(); // Ensure it shows 30/30
+            setTimeout(() => {
+                gameScreen.classList.add('hidden-screen');
+                endScreen.classList.remove('hidden-screen');
+                endScreen.style.display = 'flex';
+                fireConfetti();
+            }, 500);
+        }
+
+        function fireConfetti() {
+            const canvas = document.getElementById('confetti');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const pieces = [];
+            const colors = ['#f472b6', '#a78bfa', '#34d399', '#fbbf24', '#60a5fa'];
+
+            for (let i = 0; i < 150; i++) {
+                pieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 10 + 5,
+                    color: colors[Math.random() * colors.length | 0],
+                    speedY: Math.random() * 3 + 2,
+                    speedX: (Math.random() - 0.5) * 2,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10
+                });
+            }
+
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let active = false;
+
+                pieces.forEach(p => {
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+                    p.rotation += p.rotationSpeed;
+
+                    if (p.y < canvas.height) active = true;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rotation * Math.PI / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+                    ctx.restore();
+                });
+
+                if (active) {
+                    requestAnimationFrame(animate);
+                }
+            }
+            animate();
+        }
+
+        // Handle resize for confetti
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('confetti');
+            if (canvas.width > 0) { // only resize if active
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
+    </script>
+</body>
+</html>
